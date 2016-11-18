@@ -2,7 +2,6 @@ sudo: false
 
 matrix:
   include:
-  - os: linux
   - os: osx
 
 language: node_js
@@ -25,7 +24,6 @@ addons:
       - g++-4.8
 
 install:
-  - export CXX="g++-4.8"
   - nvm --version
   - nvm install 6.9.1
   - node --version
