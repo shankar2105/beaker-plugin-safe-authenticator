@@ -5,9 +5,13 @@ matrix:
   - os: linux
   - os: osx
 
-language: generic
+language: node_js
 
-osx_image: xcode7.3
+node_js:
+  - "6"
+
+env:
+  - CXX=g++-4.8
 
 cache:
   directories:
@@ -15,8 +19,10 @@ cache:
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-      - xvfb
+      - g++-4.8
 
 install:
   - export CXX="g++-4.8"
