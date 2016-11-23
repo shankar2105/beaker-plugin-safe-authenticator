@@ -1,4 +1,4 @@
-import * as network from '../ffi/network';
+import clientManager from '../ffi/client_manager';
 
 export const manifest = {
   registerNetworkListener: 'async'
@@ -12,5 +12,5 @@ export const registerNetworkListener = (cb) => {
   if (typeof cb !== 'function') {
     throw new Error('Network listener callback is not a function');
   }
-  network.registerNetworkListener(cb);
+  clientManager.registerNetworkListener(cb);
 };
