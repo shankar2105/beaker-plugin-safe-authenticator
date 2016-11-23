@@ -56,6 +56,15 @@ class ClientManager extends FfiApi {
     return new Promise(executor);
   }
 
+  // Create new user account
+  createNewAccount(locator, secret) {
+    const executor = (resolve, reject) => {
+      return resolve();
+    };
+
+    return new Promise(executor);
+  }
+
   /*
    * Drop client handle
    * */
