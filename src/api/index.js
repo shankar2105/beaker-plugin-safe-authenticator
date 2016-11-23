@@ -1,11 +1,11 @@
-import * as network from './network';
+import * as client from './client';
 
 const safeAuthApi = [
   {
     name: 'safeAuthenticator',
     isInternal: true,
-    manifest: network.manifest,
-    methods: network.registerNetworkListener
+    manifest: client.manifest,
+    methods: client
   }
 ];
 

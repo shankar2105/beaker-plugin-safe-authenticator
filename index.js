@@ -1,14 +1,13 @@
 import safeAuthApi from './src/api';
-import ffiManager from './src/ffi/ffi_manager';
+import ffiLoader from './src/ffi/ffi_loader';
 import clientManager from './src/ffi/client_manager';
 
-// load ffi modules
-ffiManager.loadModules();
-
 // load ffi library
-ffiManager.loadLibrary()
+ffiLoader.loadLibrary()
   // create unregistered client
-  .then(clientManager.createUnregisteredClient());
+  .then(() => clientManager.createUnregisteredClient())
+  // TODO notify on browser
+  .catch(err => console.error(err));
 
 module.exports = {
   configure() {},

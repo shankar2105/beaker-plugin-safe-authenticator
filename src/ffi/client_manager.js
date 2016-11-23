@@ -1,6 +1,12 @@
-class ClientManager {
+/* eslint-disable func-names */
+import FfiApi from './FfiApi';
+import CONST from './constants';
+
+class ClientManager extends FfiApi {
   constructor() {
-    this.networkStatusChangeListener = null;
+    super();
+    this.networkState = CONST.NETWORK_STATES.DISCONNECTED;
+    this.networkStateChangeListener = function () {};
     this.handleId = null;
   }
 
@@ -12,18 +18,27 @@ class ClientManager {
     return this.handleId;
   }
 
-  registerNetworkListener(cb) {
-    this.networkStatusChangeListener = cb;
+  setNetworkListener(cb) {
+    this.networkStateChangeListener = cb;
+    this.networkStateChangeListener(this.networkState);
   }
 
   /*
   * Create unregistered client
   * */
   createUnregisteredClient() {
-    if (this.networkStatusChangeListener) {
-      // TODO register network listener callback
-    }
+    this.networkState = CONST.NETWORK_STATES.CONNECTING;
+
+    // const onStateChange = ffi.Callback(Void, [int32], (state) => {
+    //   if (this.networkStateChangeListener) {
+    //     this.networkStateChangeListener(state);
+    //   }
+    // });
+
     // TODO create unregistered client
+
+    this.networkState = CONST.NETWORK_STATES.CONNECTED;
+    this.networkStateChangeListener(this.networkState); // TODO remove it
   }
 
   /*
