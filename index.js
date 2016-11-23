@@ -1,3 +1,5 @@
+import safeAuthApi from './src/api';
+
 module.exports = {
   configure() {
   },
@@ -6,5 +8,5 @@ module.exports = {
     href: 'https://safenetforum.org/t/safe-network-alpha-release/10687/1'
   }],
   protocols: [],
-  webAPIs: [{}]
+  webAPIs: safeAuthApi
 };
