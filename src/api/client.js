@@ -6,7 +6,7 @@ export const manifest = {
 
 /**
  * Set SAFE Network connectivity state listener
- * @param cb - callback provide network state
+ * @param cb - callback to be invoked on network state change
  */
 export const onNetworkStateChange = (cb) => {
   if (typeof cb !== 'function') {

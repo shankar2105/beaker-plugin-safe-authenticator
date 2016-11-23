@@ -2,20 +2,24 @@
 import FfiApi from './FfiApi';
 import CONST from './constants';
 
+const _networkState = Symbol('networkState');
+const _networkStateChangeListener = Symbol('networkStateChangeListener');
+const _clientHandle = Symbol('clientHandle');
+
 class ClientManager extends FfiApi {
   constructor() {
     super();
-    this.networkState = CONST.NETWORK_STATES.DISCONNECTED;
-    this.networkStateChangeListener = function () {};
-    this.handleId = null;
+    this[_networkState] = CONST.NETWORK_STATES.DISCONNECTED;
+    this[_networkStateChangeListener] = null;
+    this[_clientHandle] = null;
   }
 
   set clientHandle(handle) {
-    this.handleId = handle;
+    this[_clientHandle] = handle;
   }
 
   get clientHandle() {
-    return this.handleId;
+    return this[_clientHandle];
   }
 
   setNetworkListener(cb) {
@@ -30,6 +34,7 @@ class ClientManager extends FfiApi {
     this.networkState = CONST.NETWORK_STATES.CONNECTING;
 
     // const onStateChange = ffi.Callback(Void, [int32], (state) => {
+    //   this.networkState = state;
     //   if (this.networkStateChangeListener) {
     //     this.networkStateChangeListener(state);
     //   }
@@ -38,7 +43,7 @@ class ClientManager extends FfiApi {
     // TODO create unregistered client
 
     this.networkState = CONST.NETWORK_STATES.CONNECTED;
-    this.networkStateChangeListener(this.networkState); // TODO remove it
+    this.networkStateChangeListener(this.networkState);
   }
 
   /*
