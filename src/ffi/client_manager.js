@@ -53,8 +53,8 @@ class ClientManager extends FfiApi {
       encode_auth_resp: [Void, [voidPointer, AuthReq, u32, bool, voidPointer, 'pointer']],
       encode_containers_resp: [Void, [voidPointer, ContainersReq, u32, bool, voidPointer, 'pointer']],
       authenticator_registered_apps: [int32, [voidPointer, voidPointer, 'pointer']],
-      authenticator_registered_app_free: [Void, [RegisteredAppArrayType]],
-      authenticator_registered_apps_free: [Void, [RegisteredAppArrayType, usize, usize]]
+      authenticator_registered_apps_free: [Void, [RegisteredAppArrayType, usize, usize]],
+      authenticator_revoke_app: [Void, [voidPointer, FfiString, voidPointer, 'pointer']]
     };
   }
 
@@ -220,8 +220,28 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('messages.should_not_be_empty', i18n.__('AppId'))));
       }
 
-      // TODO revoke application with appId
-      resolve();
+      const authenticatorHandle = this.getAuthenticatorHandle();
+
+      if (!authenticatorHandle) {
+        return reject(new Error(i18n.__('messages.unauthorised')));
+      }
+
+
+      try {
+        const revokeCb = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, code, res) => {
+          console.log('revokeCb:: ', res);
+          resolve(res);
+        });
+
+        this.safeCore.authenticator_revoke_app(
+          authenticatorHandle,
+          this._getFfiStringStruct(appId),
+          Null,
+          revokeCb
+        );
+      } catch (e) {
+        reject(e.message);
+      }
     });
   }
 
@@ -355,10 +375,10 @@ class ClientManager extends FfiApi {
         const appListCb = ffi.Callback(Void, [voidPointer, int32, RegisteredAppArrayType, usize, usize],
           (userData, code, appList, len, cap) => {
             console.log('appListCb:: ', code, appList, len, cap);
+            const authorisedApps = appList;
             // TODO parse appList
-            this.safeCore.authenticator_registered_app_free(appList);
             this.safeCore.authenticator_registered_apps_free(appList, len, cap);
-            resolve(appList);
+            resolve(authorisedApps);
           });
 
         const onResult = (err, res) => {
