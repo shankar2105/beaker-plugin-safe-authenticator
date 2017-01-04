@@ -38,6 +38,7 @@ before_install:
 install:
   - node --version
   - npm --version
+  - ls $TRAVIS_BUILD_DIR
   - npm i
 
 script:
