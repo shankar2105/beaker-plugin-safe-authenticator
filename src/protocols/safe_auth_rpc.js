@@ -2,11 +2,11 @@
 /* eslint-disable import/extensions */
 import { shell, ipcMain } from 'electron';
 /* eslint-enable import/extensions */
-import i18n from 'i18n';
 
 let clientManager = null;
 
 const reqQueue = [];
+
 let isReqProcessing = false;
 
 const processReqQueue = () => {
@@ -19,8 +19,7 @@ const processReqQueue = () => {
   }
 
   isReqProcessing = true;
-  const result = reqQueue.shift();
-  clientManager.decryptRequest(result);
+  clientManager.decryptRequest(reqQueue[0]);
 };
 
 const registerAuthDecision = (event, authData, isAllowed) => {
@@ -36,10 +35,16 @@ const registerAuthDecision = (event, authData, isAllowed) => {
     .then((res) => {
       setTimeout(() => {
         isReqProcessing = false;
+        reqQueue.shift();
         processReqQueue();
+        console.log('Auth request res :: ', res)
         event.sender.send('onAuthDecisionRes', res);
       }, 5000);
-      shell.openExternal(res);
+      try {
+        shell.openExternal(res);
+      } catch (e) {
+        console.error(e.message);
+      }
     })
     .catch((err) => {
       console.error(err);
@@ -59,6 +64,7 @@ const registerContainerDecision = (event, contData, isAllowed) => {
     .then((res) => {
       setTimeout(() => {
         isReqProcessing = false;
+        reqQueue.shift();
         processReqQueue();
         event.sender.send('onContDecisionRes', res);
       }, 5000);

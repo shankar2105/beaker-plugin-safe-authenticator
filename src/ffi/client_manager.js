@@ -2,22 +2,28 @@
 /* eslint-disable import/no-unresolved, import/extensions */
 import ffi from 'ffi';
 import ref from 'ref';
+import crypto from 'crypto';
 /* eslint-enable import/no-unresolved, import/extensions */
 import i18n from 'i18n';
+import config from '../config';
 import {
   u32,
   Void,
   usize,
   int32,
   bool,
+  u8Pointer,
+  u32Pointer,
   voidPointer,
   AppHandlePointer,
+  ffiStringPointer,
   Null,
   FfiString,
   AuthReq,
   ContainersReq,
   RegisteredAppArrayType
 } from './models/types';
+import * as typeParsers from './models/typesParsers';
 import FfiApi from './FfiApi';
 import CONST from './constants.json';
 
@@ -29,10 +35,12 @@ const _containerReqListener = Symbol('containerReqListener');
 const _reqErrorListener = Symbol('reqErrorListener');
 const _clientHandle = Symbol('clientHandle');
 const _reqDecryptList = Symbol('reqDecryptList');
+const _callbackRegistry = Symbol('callbackRegistry');
 
 class ClientManager extends FfiApi {
   constructor() {
     super();
+    config.i18n();
     this[_networkState] = CONST.NETWORK_STATES.DISCONNECTED;
     this[_networkStateChangeListener] = null;
     this[_networkStateChangeIpcListener] = null;
@@ -41,6 +49,7 @@ class ClientManager extends FfiApi {
     this[_reqErrorListener] = null;
     this[_clientHandle] = {};
     this[_reqDecryptList] = {};
+    this[_callbackRegistry] = {};
   }
 
   /* eslint-disable no-unused-vars, class-methods-use-this */
@@ -54,7 +63,9 @@ class ClientManager extends FfiApi {
       encode_containers_resp: [Void, [voidPointer, ContainersReq, u32, bool, voidPointer, 'pointer']],
       authenticator_registered_apps: [int32, [voidPointer, voidPointer, 'pointer']],
       authenticator_registered_apps_free: [Void, [RegisteredAppArrayType, usize, usize]],
-      authenticator_revoke_app: [Void, [voidPointer, FfiString, voidPointer, 'pointer']]
+      authenticator_registered_app_free: [Void, [RegisteredAppArrayType]],
+      authenticator_revoke_app: [Void, [voidPointer, FfiString, voidPointer, 'pointer']],
+      ffi_string_create: [int32, [u32Pointer, usize, ffiStringPointer]]
     };
   }
 
@@ -105,13 +116,13 @@ class ClientManager extends FfiApi {
 
   /**
    * Authorise application request
-   * @param appReq
+   * @param req
    * @param isAllowed
    * @returns {Promise}
    */
-  authDecision(appReq, isAllowed) {
+  authDecision(req, isAllowed) {
     return new Promise((resolve, reject) => {
-      if (!authReq || typeof isAllowed !== 'boolean') {
+      if (!req || typeof isAllowed !== 'boolean') {
         return reject(new Error(i18n.__('invalid_params')));
       }
       const authenticatorHandle = this.getAuthenticatorHandle();
@@ -120,26 +131,23 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
-      const reqId = appReq['req_id'];
-
-      if (!reqId) {
+      if (!req.reqId) {
         return reject(new Error(i18n.__('invalid_req')));
       }
 
-      const authReq = this[_reqDecryptList][reqId];
+      const authReq = this[_reqDecryptList][req.reqId];
 
-      delete this[_reqDecryptList][reqId];
+      delete this[_reqDecryptList][req.reqId];
 
       try {
         const authReqCb = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, code, res) => {
-          console.log('authReqCb :: ', res);
-          resolve(res);
+          resolve(typeParsers.parseFfiString(res));
         });
 
         this.safeCore.encode_auth_resp(
           authenticatorHandle,
           authReq,
-          reqId,
+          req.reqId,
           isAllowed,
           Null,
           authReqCb
@@ -147,19 +155,18 @@ class ClientManager extends FfiApi {
       } catch (e) {
         reject(e.message);
       }
-      resolve();
     });
   }
 
   /**
    * Authorise container request
-   * @param contReq
+   * @param req
    * @param isAllowed
    * @returns {Promise}
    */
-  containerDecision(contReq, isAllowed) {
+  containerDecision(req, isAllowed) {
     return new Promise((resolve, reject) => {
-      if (!contReq || typeof isAllowed !== 'boolean') {
+      if (!req || typeof isAllowed !== 'boolean') {
         return reject(new Error(i18n.__('invalid_params')));
       }
       const authenticatorHandle = this.getAuthenticatorHandle();
@@ -168,34 +175,30 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
-      const reqId = appReq['req_id'];
-
-      if (!reqId) {
+      if (!req.reqId) {
         return reject(new Error(i18n.__('invalid_req')));
       }
 
-      const contReq = this[_reqDecryptList][reqId];
+      const contReq = this[_reqDecryptList][req.reqId];
 
-      delete this[_reqDecryptList][reqId];
+      delete this[_reqDecryptList][req.reqId];
 
       try {
         const contReqCb = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, code, res) => {
-          console.log('contReqCb:: ', res);
-          resolve(res);
+          resolve(typeParsers.parseFfiString(res));
         });
 
         this.safeCore.encode_containers_resp(
           authenticatorHandle,
           contReq,
-          reqId,
+          req.reqId,
           isAllowed,
           Null,
-          authReqCb
+          contReqCb
         );
       } catch (e) {
         reject(e.message);
       }
-      resolve();
     });
   }
 
@@ -371,14 +374,16 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
+      return resolve();
+
       try {
         const appListCb = ffi.Callback(Void, [voidPointer, int32, RegisteredAppArrayType, usize, usize],
           (userData, code, appList, len, cap) => {
-            console.log('appListCb:: ', code, appList, len, cap);
-            const authorisedApps = appList;
-            // TODO parse appList
+            console.log('appListCb:: ', code, appList[0], len, cap);
+            const authorisedApps = [];
+            this.safeCore.authenticator_registered_app_free(appList);
             this.safeCore.authenticator_registered_apps_free(appList, len, cap);
-            resolve(authorisedApps);
+            resolve(typeParsers.parseRegisteredAppArray(appList));
           });
 
         const onResult = (err, res) => {
@@ -405,6 +410,7 @@ class ClientManager extends FfiApi {
 
   decryptRequest(msg) {
     msg = msg.replace('safe-auth://', '');
+    console.log('safe alis', msg);
     return new Promise((resolve, reject) => {
       if (!msg) {
         return reject();
@@ -416,56 +422,45 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('unauthorised')));
       }
 
-      // todo parse request
-      const mockReq = {
-        req_id: 1683540874,
-        req: {
-          AuthReq: {
-            app: {
-              id: 'net.maidsafe.demo.app',
-              scope: null,
-              name: 'sample',
-              vendor: 'maidsafe'
-            },
-            app_container: false,
-            containers: {
-              '_public': [
-                'Read',
-                'Write'
-              ],
-              'safe-app': 'safe-app'
-            }
-          }
+      this[_callbackRegistry]['decryptReqAuthCb'] = ffi.Callback(Void, [voidPointer, u32, AuthReq], (userData, reqId, req) => {
+        this[_reqDecryptList][reqId] = req;
+        if (typeof this[_authReqListener] !== 'function') {
+          return;
         }
-      };
-
-      const req = new Buffer(JSON.stringify(mockReq));
-      const parsedReq = Buffer(req).toString(); // parse it with struct
-
-      this[_reqDecryptList][parsedReq.req_id] = req;
-
-      return this[_authReqListener](parsedReq);
-
-      const authReqCb = ffi.Callback(Void, [voidPointer, u32, AuthReq], (userData, res, req) => {
-        console.log('authReqCb :: ', req);
+        this[_authReqListener]({
+          reqId,
+          authReq: typeParsers.parseAuthReq(req)
+        });
       });
 
-      const containerReqCb = ffi.Callback(Void, [voidPointer, int32, ContainersReq], (userData, res, req) => {
+      this[_callbackRegistry]['decryptReqContainerCb'] = ffi.Callback(Void, [voidPointer, int32, ContainersReq], (userData, res, req) => {
         console.log('containerReqCb :: ', req);
+        this[_reqDecryptList][reqId] = req;
+        if (typeof this[_containerReqListener] !== 'function') {
+          return;
+        }
+        this[_containerReqListener]({
+          reqId,
+          contReq: typeParsers.parseContainerReq(req)
+        });
       });
 
-      const reqErrorCb = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, res, error) => {
-        console.log('reqErrorCb :: ', error);
+      this[_callbackRegistry]['decryptReqErrorCb'] = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, res, error) => {
+        console.log('reqErrorCb :: ', res, error);
+        if (typeof this[_reqErrorListener] !== 'function') {
+          return;
+        }
+        this[_reqErrorListener](typeParsers.parseFfiString(error));
       });
 
       try {
         this.safeCore.decode_ipc_msg(
           authenticatorHandle,
-          this._getFfiStringStruct(msg),
+          this._createFFIString(msg),
           Null,
-          authReqCb,
-          containerReqCb,
-          reqErrorCb);
+          this[_callbackRegistry]['decryptReqAuthCb'],
+          this[_callbackRegistry]['decryptReqContainerCb'],
+          this[_callbackRegistry]['decryptReqErrorCb']);
       } catch (e) {
         console.error(`Auth request decrypt error :: ${e.message}`);
       }
@@ -481,6 +476,16 @@ class ClientManager extends FfiApi {
     }
     // TODO drop client handle
     delete this[_clientHandle][key];
+  }
+
+  _createFFIString(str) {
+    const buff = new Buffer(str);
+    const stringPointer = ref.alloc(FfiString);
+    const res = this.safeCore.ffi_string_create(buff, buff.length, stringPointer);
+    if (res !== 0) {
+      throw 'Create string failed' + res;
+    }
+    return stringPointer.deref();
   }
 
   /* eslint-disable class-methods-use-this */
@@ -523,11 +528,11 @@ class ClientManager extends FfiApi {
   /* eslint-disable class-methods-use-this */
   _isUserCredentialsValid(locator, secret) {
     /* eslint-enable class-methods-use-this */
-    if (!locator) {
+    if (!(locator && locator.trim())) {
       return new Error(i18n.__('messages.should_not_be_empty', i18n.__('Locator')));
     }
 
-    if (!secret) {
+    if (!(secret && secret.trim())) {
       return new Error(i18n.__('messages.should_not_be_empty', i18n.__('Secret')));
     }
 
@@ -537,14 +542,6 @@ class ClientManager extends FfiApi {
 
     if (typeof secret !== 'string') {
       return new Error(i18n.__('messages.must_be_string', i18n.__('Secret')));
-    }
-
-    if (!locator.trim()) {
-      return new Error(i18n.__('messages.should_not_be_empty', i18n.__('Locator')));
-    }
-
-    if (!secret.trim()) {
-      return new Error(i18n.__('messages.should_not_be_empty', i18n.__('Secret')));
     }
   }
 }
