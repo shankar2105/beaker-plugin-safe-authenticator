@@ -233,7 +233,7 @@ class ClientManager extends FfiApi {
       try {
         const revokeCb = ffi.Callback(Void, [voidPointer, int32, FfiString], (userData, code, res) => {
           console.log('revokeCb:: ', res);
-          resolve(res);
+          resolve(typeParsers.parseFfiString(res));
         });
 
         this.safeCore.authenticator_revoke_app(
