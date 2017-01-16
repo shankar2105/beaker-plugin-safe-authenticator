@@ -1,4 +1,4 @@
 [submodule "native"]
 	path = native
-	url = https://github.com/krishnaIndia/safe_core.git
+	url = https://github.com/shankar2105/safe_core.git
 	branch = patch_ffi
