@@ -139,7 +139,7 @@ describe('Client', () => {
       return clientManager.createAccount(randomCredentials.locator, randomCredentials.secret)
         .should.be.fulfilled()
         .then(() => clientManager.login(randomCredentials.locator, randomCredentials.secret))
-        .should.be.fulfilled()
+        .should.be.fulfilled();
     });
   });
 
