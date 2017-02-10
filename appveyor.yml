@@ -31,22 +31,7 @@ install:
   - ps: cd $env:APPVEYOR_BUILD_FOLDER
   - git submodule update --init --recursive
   - npm i
-  - dir
-  - cd ./native
-  - dir
-  - cd ./native/safe_authenticator
-  - dir
-  - cargo build --release --features \"use-mock-routing\"
-  - cd ../../
-  - dir
-  - cd ./native
-  - dir
-  - cd ./native/target
-  - dir
-  - cd ./native/target/release
-  - dir
-  - cp -f ./native/target/release/safe_authenticator.dll ./src/ffi
-  - npm run build-system-uri-win
+
 build: off
 before_test:
   - npm run grep-error-codes
