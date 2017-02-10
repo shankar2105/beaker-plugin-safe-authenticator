@@ -6,7 +6,6 @@ environment:
     - RUST_VERSION: 1.14.0
 
 platform:
-  - x86
   - x64
 
 cache:
