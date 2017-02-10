@@ -15,7 +15,7 @@
     "build-api": "cross-env NODE_ENV=production node -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.api.js --progress --profile --colors",
     "build-protocol": "cross-env NODE_ENV=production node -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.protocol.js --progress --profile --colors",
     "build": "concurrently \"npm run build-app\" \"npm run build-api\" \"npm run build-protocol\"",
-    "prepublish": "npm run build-native-mock",
+    "prepublish": "npm run build-native-mock && build-system-uri",
     "grep-error-codes": "./node_modules/.bin/babel-node grep_error_codes.js"
   },
   "repository": {
