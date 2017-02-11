@@ -38,10 +38,11 @@ before_install:
 install:
   - node --version
   - npm --version
-  - ls $TRAVIS_BUILD_DIR
   - npm i
 
 before_script:
+  - npm run release:mock
+  - npm run copy-binaries:unix
   - npm run grep-error-codes
 
 script:
