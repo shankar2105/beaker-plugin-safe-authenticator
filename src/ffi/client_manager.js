@@ -1,13 +1,16 @@
+/**
+ * Client Manager
+ * Expose API for Authenticator as a client
+ */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable import/no-unresolved, import/extensions */
 import ffi from 'ffi';
-import ref from 'ref';
 /* eslint-enable import/no-unresolved, import/extensions */
 import i18n from 'i18n';
 import config from '../config';
-import * as types from './model/types';
-import * as typeParser from './model/typesParser';
-import * as typeConstructor from './model/typesConstructor';
+import * as types from './refs/types';
+import * as typeParser from './refs/typesParser';
+import * as typeConstructor from './refs/typesConstructor';
 import systemUriLoader from './sys_uri_loader';
 import FfiApi from './FfiApi';
 import CONST from './../constants.json';
@@ -41,6 +44,18 @@ class ClientManager extends FfiApi {
     this[_callbackRegistry] = {};
   }
 
+  get authenticatorHandle() {
+    return this[_authenticatorHandle];
+  }
+
+  get networkState() {
+    return this[_networkState];
+  }
+
+  /**
+   * Functions to register with FFI library
+   * @returns Object
+   */
   /* eslint-disable no-unused-vars, class-methods-use-this */
   getFunctionsToRegister() {
     /* eslint-enable no-unused-vars, class-methods-use-this */
@@ -55,14 +70,6 @@ class ClientManager extends FfiApi {
     };
   }
 
-  get authenticatorHandle() {
-    return this[_authenticatorHandle];
-  }
-
-  get networkState() {
-    return this[_networkState];
-  }
-
   /**
    * Set SAFE Network connectivity state listener
    * @param cb - callback to be invoked on network state change
@@ -74,6 +81,10 @@ class ClientManager extends FfiApi {
     this[_networkStateChangeListener] = cb;
   }
 
+  /**
+   * Set registered app list update listener
+   * @param cb
+   */
   setAppListUpdateListener(cb) {
     if (typeof cb !== 'function') {
       throw new Error(i18n.__('messages.must_be_function', i18n.__('App list listener callback')));
@@ -81,6 +92,10 @@ class ClientManager extends FfiApi {
     this[_appListUpdateListener] = cb;
   }
 
+  /**
+   * Set auth request listener
+   * @param cb
+   */
   setAuthReqListener(cb) {
     if (typeof cb !== 'function') {
       return;
@@ -88,6 +103,10 @@ class ClientManager extends FfiApi {
     this[_authReqListener] = cb;
   }
 
+  /**
+   * Set container request listener
+   * @param cb
+   */
   setContainerReqListener(cb) {
     if (typeof cb !== 'function') {
       return;
@@ -95,6 +114,10 @@ class ClientManager extends FfiApi {
     this[_containerReqListener] = cb;
   }
 
+  /**
+   * Set request error listener
+   * @param cb
+   */
   setReqErrorListener(cb) {
     if (typeof cb !== 'function') {
       return;
@@ -102,6 +125,10 @@ class ClientManager extends FfiApi {
     this[_reqErrorListener] = cb;
   }
 
+  /**
+   * Set Network IPC listener
+   * @param cb
+   */
   setNetworkIpcListener(cb) {
     this[_networkStateChangeIpcListener] = cb;
   }
@@ -126,8 +153,8 @@ class ClientManager extends FfiApi {
         return reject(new Error(i18n.__('invalid_req')));
       }
 
-      const authReq = ref.alloc(types.AuthReq,
-        typeConstructor.constructAuthReq(this[_reqDecryptList][req.reqId]));
+      const authReq = types.allocAuthReq(typeConstructor.constructAuthReq(
+        this[_reqDecryptList][req.reqId]));
 
       delete this[_reqDecryptList][req.reqId];
 
@@ -175,8 +202,8 @@ class ClientManager extends FfiApi {
       if (!req.reqId) {
         return reject(new Error(i18n.__('invalid_req')));
       }
-      const contReq = ref.alloc(types.ContainersReq,
-        typeConstructor.constructContainerReq(this[_reqDecryptList][req.reqId]));
+      const contReq = types.allocContainerReq(typeConstructor.constructContainerReq(
+        this[_reqDecryptList][req.reqId]));
 
       delete this[_reqDecryptList][req.reqId];
 
@@ -243,7 +270,7 @@ class ClientManager extends FfiApi {
 
         this.safeCore.authenticator_revoke_app(
           this.authenticatorHandle,
-          typeConstructor.getCString(appId),
+          types.allocCString(appId),
           types.Null,
           revokeCb
         );
@@ -266,7 +293,7 @@ class ClientManager extends FfiApi {
         return reject(validationErr);
       }
 
-      const appHandle = ref.alloc(types.AppHandlePointer);
+      const appHandle = types.allocAppHandlePointer();
 
       const onStateChange = this._getFfiNetworkStateCb();
 
@@ -280,8 +307,8 @@ class ClientManager extends FfiApi {
           resolve();
         };
         this.safeCore.login.async(
-          typeConstructor.getCString(locator),
-          typeConstructor.getCString(secret),
+          types.allocCString(locator),
+          types.allocCString(secret),
           appHandle,
           types.Null,
           onStateChange,
@@ -304,7 +331,7 @@ class ClientManager extends FfiApi {
       if (validationErr) {
         return reject(validationErr);
       }
-      const appHandle = ref.alloc(types.AppHandlePointer);
+      const appHandle = types.allocAppHandlePointer();
 
       const onStateChange = this._getFfiNetworkStateCb();
 
@@ -318,8 +345,8 @@ class ClientManager extends FfiApi {
           resolve();
         };
         this.safeCore.create_acc.async(
-          typeConstructor.getCString(locator),
-          typeConstructor.getCString(secret),
+          types.allocCString(locator),
+          types.allocCString(secret),
           appHandle,
           types.Null,
           onStateChange,
@@ -368,7 +395,9 @@ class ClientManager extends FfiApi {
   }
 
   /**
-   * Decrypt request
+   * Decrypt auth or container request
+   * @param url
+   * @returns {Promise}
    */
   decryptRequest(url) {
     const msg = url.replace('safe-auth://', '');
@@ -418,7 +447,7 @@ class ClientManager extends FfiApi {
       try {
         this.safeCore.auth_decode_ipc_msg(
           this.authenticatorHandle,
-          typeConstructor.getCString(msg),
+          types.allocCString(msg),
           types.Null,
           this[_callbackRegistry].decryptReqAuthCb,
           this[_callbackRegistry].decryptReqContainerCb,
@@ -429,12 +458,22 @@ class ClientManager extends FfiApi {
     });
   }
 
+  /**
+   * Register URI scheme for cross platforms
+   * @param appInfo
+   * @param schemes
+   * @returns {*}
+   */
   /* eslint-disable class-methods-use-this */
   registerUriScheme(appInfo, schemes) {
     /* eslint-enable class-methods-use-this */
     return systemUriLoader.registerUriScheme(appInfo, schemes);
   }
 
+  /**
+   * Update app list - Calls app list update listener
+   * @private
+   */
   _updateAppList() {
     this.getAuthorisedApps()
       .then((apps) => {
@@ -444,6 +483,11 @@ class ClientManager extends FfiApi {
       });
   }
 
+  /**
+   * Prepare FFI network state callback function
+   * @returns {*}
+   * @private
+   */
   _getFfiNetworkStateCb() {
     return ffi.Callback(types.Void,
       [types.voidPointer, types.int32, types.int32], (userData, res, state) => {
@@ -452,6 +496,11 @@ class ClientManager extends FfiApi {
       });
   }
 
+  /**
+   * Push network state to registered listeners
+   * @param state
+   * @private
+   */
   _pushNetworkState(state) {
     let networkState = state;
     if (typeof networkState === 'undefined') {
@@ -468,6 +517,13 @@ class ClientManager extends FfiApi {
     }
   }
 
+  /**
+   * Validate user credential - locator and secret
+   * @param locator
+   * @param secret
+   * @returns {Error}
+   * @private
+   */
   /* eslint-disable class-methods-use-this */
   _isUserCredentialsValid(locator, secret) {
     /* eslint-enable class-methods-use-this */

@@ -1,4 +1,3 @@
-import ref from 'ref';
 import ArrayType from 'ref-array';
 import * as types from './types';
 
@@ -58,5 +57,3 @@ export const constructContainerReq = (contReq) => (
     containers_cap: contReq.containers_cap
   })
 );
-
-export const getCString = (str) => (ref.allocCString(str));

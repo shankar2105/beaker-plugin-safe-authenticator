@@ -64,3 +64,11 @@ export const ContainersReq = StructType({
 });
 
 export const ContainersReqPointer = ref.refType(ContainersReq);
+
+export const allocAppHandlePointer = () => (ref.alloc(AppHandlePointer));
+
+export const allocCString = (str) => (ref.allocCString(str));
+
+export const allocAuthReq = (req) => (ref.alloc(AuthReq, req));
+
+export const allocContainerReq = (req) => (ref.alloc(ContainersReq, req));
