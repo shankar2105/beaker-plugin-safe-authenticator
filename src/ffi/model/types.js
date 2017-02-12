@@ -1,5 +1,4 @@
 import ref from 'ref';
-import ArrayType from 'ref-array';
 import StructType from 'ref-struct';
 import Enum from 'enum';
 
@@ -13,23 +12,8 @@ export const Null = ref.NULL;
 export const CString = ref.types.CString;
 
 // Pointer Types
-export const u8Pointer = ref.refType(u8);
-export const CStringPointer = ref.refType(CString);
-export const u32Pointer = ref.refType(u32);
 export const voidPointer = ref.refType(Void);
 export const AppHandlePointer = ref.refType(voidPointer);
-
-// Struct types and Array types
-export const u8ArrayType = ArrayType(u8);
-
-export const AppKeys = StructType({
-  owner_key: u8ArrayType,
-  enc_key: u8ArrayType,
-  sign_pk: u8ArrayType,
-  sign_sk: u8ArrayType,
-  enc_pk: u8ArrayType,
-  enc_sk: u8ArrayType
-});
 
 export const AppExchangeInfo = StructType({
   id: CString,
@@ -46,29 +30,12 @@ export const Permission = new Enum({
   ManagePermissions: 4
 });
 
-export const AppInfo = StructType({
-  info: AppExchangeInfo,
-  keys: AppKeys
-});
-
-// export const PermissionArray = StructType({
-//   ptr: ref.refType(Permission),
-//   len: usize,
-//   cap: usize
-// });
-
 export const ContainerPermissions = StructType({
   cont_name: CString,
   access: ref.refType(Permission),
   access_len: usize,
   access_cap: usize
 });
-
-// export const ContainerPermissionsArray = StructType({
-//   ptr: ref.refType(ContainerPermissions),
-//   len: usize,
-//   cap: usize
-// });
 
 export const RegisteredApp = StructType({
   app_id: AppExchangeInfo,
