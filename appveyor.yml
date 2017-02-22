@@ -29,8 +29,8 @@ install:
           cmd /c curl -fsSL -o "Install Rustup.ps1" "$url/Install%20Rustup.ps1"
           . ".\Install Rustup.ps1"
   - ps: cd $env:APPVEYOR_BUILD_FOLDER
-  - git submodule update --init --recursive
-  - npm i
+#  - git submodule update --init --recursive
+#  - npm i
 
 build: off
 
@@ -50,4 +50,4 @@ before_test:
 
 test_script:
   - npm run lint
-  - npm test
+#  - npm test
