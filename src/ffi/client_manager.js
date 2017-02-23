@@ -400,11 +400,12 @@ class ClientManager extends FfiApi {
    * @returns {Promise}
    */
   decryptRequest(url) {
-    const msg = url.replace('safe-auth://', '');
     return new Promise((resolve, reject) => {
-      if (!msg) {
+      if (!url) {
         return reject();
       }
+
+      const msg = url.replace('safe-auth://', '');
 
       if (!this.authenticatorHandle) {
         return reject(new Error(i18n.__('unauthorised')));

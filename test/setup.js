@@ -13,7 +13,7 @@ i18n.setLocale('en');
 
 const init = () => {
   ffiLoader.loadLibrary()
-    .catch(console.error)
+    .catch(console.error);
 };
 
 init();
