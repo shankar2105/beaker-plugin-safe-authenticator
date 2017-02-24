@@ -141,16 +141,16 @@ class ClientManager extends FfiApi {
    */
   authDecision(req, isAllowed) {
     return new Promise((resolve, reject) => {
-      if (!req || typeof isAllowed !== 'boolean') {
-        return reject(new Error(i18n.__('invalid_params')));
-      }
-
       if (!this.authenticatorHandle) {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
-      if (!req.reqId) {
-        return reject(new Error(i18n.__('invalid_req')));
+      if (!req || typeof isAllowed !== 'boolean') {
+        return reject(new Error(i18n.__('messages.invalid_params')));
+      }
+
+      if (!req.reqId || !this[_reqDecryptList][req.reqId]) {
+        return reject(new Error(i18n.__('messages.invalid_req')));
       }
 
       const authReq = types.allocAuthReq(typeConstructor.constructAuthReq(
@@ -161,7 +161,7 @@ class ClientManager extends FfiApi {
       try {
         this[_callbackRegistry].authDecisionCb = ffi.Callback(types.Void,
           [types.voidPointer, types.int32, types.CString], (userData, code, res) => {
-            if (code !== 0) {
+            if (code !== 0 && !res) {
               return reject(ERRORS[code]);
             }
             if (isAllowed) {
@@ -191,16 +191,16 @@ class ClientManager extends FfiApi {
    */
   containerDecision(req, isAllowed) {
     return new Promise((resolve, reject) => {
-      if (!req || typeof isAllowed !== 'boolean') {
-        return reject(new Error(i18n.__('invalid_params')));
-      }
-
       if (!this.authenticatorHandle) {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
-      if (!req.reqId) {
-        return reject(new Error(i18n.__('invalid_req')));
+      if (!req || typeof isAllowed !== 'boolean') {
+        return reject(new Error(i18n.__('messages.invalid_params')));
+      }
+
+      if (!req.reqId || !this[_reqDecryptList][req.reqId]) {
+        return reject(new Error(i18n.__('messages.invalid_req')));
       }
       const contReq = types.allocContainerReq(typeConstructor.constructContainerReq(
         this[_reqDecryptList][req.reqId]));
@@ -265,7 +265,12 @@ class ClientManager extends FfiApi {
               return reject(ERRORS[code]);
             }
             this._updateAppList();
-            resolve(res);
+            try {
+              this.openUri(res);
+            } catch (e) {
+              console.error(`Revoke app :: Open URI :: ${e.message}`)
+            }
+            resolve();
           });
 
         this.safeCore.authenticator_revoke_app(
@@ -408,7 +413,7 @@ class ClientManager extends FfiApi {
       const msg = url.replace('safe-auth://', '');
 
       if (!this.authenticatorHandle) {
-        return reject(new Error(i18n.__('unauthorised')));
+        return reject(new Error(i18n.__('messages.unauthorised')));
       }
 
       this[_callbackRegistry].decryptReqAuthCb = ffi.Callback(types.Void,
@@ -469,6 +474,17 @@ class ClientManager extends FfiApi {
   registerUriScheme(appInfo, schemes) {
     /* eslint-enable class-methods-use-this */
     return systemUriLoader.registerUriScheme(appInfo, schemes);
+  }
+
+  /**
+   * Open Custom URI
+   * @param uri
+   * @returns {*}
+   */
+  /* eslint-disable class-methods-use-this */
+  openUri(uri) {
+    /* eslint-enable class-methods-use-this */
+    return systemUriLoader.openUri(uri);
   }
 
   /**

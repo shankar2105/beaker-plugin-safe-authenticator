@@ -45,3 +45,5 @@ export const setAuthReqListener = (cb) => client.setAuthReqListener(cb);
 export const setContainerReqListener = (cb) => client.setContainerReqListener(cb);
 
 export const setReqErrorListener = (cb) => client.setReqErrorListener(cb);
+
+export const openUri = (uri) => client.openUri(uri);
