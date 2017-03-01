@@ -24,20 +24,20 @@ install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   - node --version
   - npm --version
-  - ps: |
-          $url = "https://github.com/maidsafe/QA/raw/master/Powershell%20Scripts/AppVeyor"
-          cmd /c curl -fsSL -o "Install Rustup.ps1" "$url/Install%20Rustup.ps1"
-          . ".\Install Rustup.ps1"
-  - ps: cd $env:APPVEYOR_BUILD_FOLDER
-  - git submodule update --init --recursive
-  - npm i
+#  - ps: |
+#          $url = "https://github.com/maidsafe/QA/raw/master/Powershell%20Scripts/AppVeyor"
+#          cmd /c curl -fsSL -o "Install Rustup.ps1" "$url/Install%20Rustup.ps1"
+#          . ".\Install Rustup.ps1"
+#  - ps: cd $env:APPVEYOR_BUILD_FOLDER
+#  - git submodule update --init --recursive
+#  - npm i
 
 build: off
 
 before_test:
-  - npm run release:mock
-  - npm run copy-binaries:win
-  - npm run grep-error-codes
+#  - npm run release:mock
+#  - npm run copy-binaries:win
+#  - npm run grep-error-codes
   - ps: |
           if($env:platform -eq "x86") {
             ls C:\MinGW\bin
@@ -45,8 +45,7 @@ before_test:
           } Else {
             Copy-Item C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin\libwinpthread-1.dll $env:APPVEYOR_BUILD_FOLDER\src\ffi -Force
           }
-  - ps: ls $env:APPVEYOR_BUILD_FOLDER\src\ffi
 
 test_script:
-  - npm run lint
-  - npm test
+#  - npm run lint
+#  - npm test
