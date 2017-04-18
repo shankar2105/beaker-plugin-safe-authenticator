@@ -24,7 +24,7 @@ build.stdout.on('data', (data) => {
 });
 
 build.stderr.on('data', (data) => {
-  console.warn(data.toString());
+  console.error(data.toString());
 });
 
 build.on('exit', (code) => {
@@ -44,7 +44,7 @@ build.on('exit', (code) => {
   });
 
   copy.stderr.on('data', (data) => {
-    console.warn(data.toString());
+    console.error(data.toString());
   });
 
   copy.on('exit', (c) => {
