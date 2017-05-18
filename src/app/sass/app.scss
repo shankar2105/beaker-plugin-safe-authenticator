@@ -1,0 +1,112 @@
+.app-list {
+  height: inherit;
+  .app-list-i {
+    width: 33.33%;
+    padding-top: 35px;
+    padding-bottom: 5px;
+    display: inline-block;
+    float: left;
+    text-align: center;
+    .app-list-i-b {
+      display: inline-block;
+      cursor: pointer;
+      max-width: 80%;
+    }
+    .app-list-i-h {
+      margin: 0 auto;
+    }
+    .app-list-i-name {
+      margin-top: 15px;
+      font: {
+        size: 14px;
+        weight: normal;
+      };
+      color: $primary-gray;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  @include clearfix();
+}
+
+.app-detail {
+  height: inherit;
+  .app-detail-b {
+    overflow: auto;
+    height: inherit;
+  }
+  .app-detail-keys {
+    padding: 25px 30px 0;
+    font: {
+      size: 12px;
+    };
+    .app-detail-key-i {
+      display: inline-block;
+      padding-right: 30px;
+      .app-detail-key {
+        font-weight: normal;
+        color: $app-detail-key-clr;
+      }
+      .app-detail-value {
+        margin-left: 8px;
+        font-weight: bold;
+        color: $app-detail-value-clr;
+      }
+    }
+  }
+  .app-detail-permissions {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 23px;
+    padding-bottom: 50px;
+    .app-detail-permission {
+      flex: 1;
+      flex-basis: 25%;
+      padding: 0 3.5px;
+      margin-top: 25px;
+      max-width: 25%;
+      .app-detail-permission-b {
+        background-color: $app-detail-permission-bg;
+        height: 100%;
+      }
+      h3 {
+        font: {
+          size: 13px;
+          weight: bold;
+        };
+        line-height: 30px;
+        background-color: $app-detail-permission-title-bg;
+        padding: 0 10px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      ul {
+        list-style: none;
+        padding: 10px;
+        li {
+          font: {
+            size: 12px;
+            weight: normal;
+          };
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  .app-detail-f {
+    padding: 0 30px 25px;
+    .lft {
+      float: left;
+    }
+    .rgt {
+      float: right;
+    }
+    @include clearfix();
+  }
+}

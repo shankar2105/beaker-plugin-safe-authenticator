@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import CONSTANTS from '../constants.json';
 
 export const isUserAuthorised = () => window.safeAuthenticator.getAuthenticatorHandle();
@@ -24,4 +25,17 @@ export const getStrengthMsg = (strength) => {
       return CONSTANTS.PASSPHRASE_STRENGTH_MSG.SECURE;
     default:
   }
+};
+
+export const parseAppName = (name) => (
+  name.split('_').map((i) => `${i[0].toUpperCase()}${i.slice(1)}`).join(' ')
+);
+
+export const getAppIconClassName = (i) => {
+  const index = (i + 1) % 6;
+  return classNames(
+    'app-list-i-h',
+    'app-icon',
+    `app-icon-clr-${index || 6}`
+  );
 };

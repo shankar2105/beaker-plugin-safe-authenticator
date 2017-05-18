@@ -1,12 +1,18 @@
 import React, { Component, PropTypes } from 'react';
-import ListItem from './app_list_item';
+import { Link } from 'react-router';
+import { parseAppName, getAppIconClassName } from '../utils';
 
 export default class AppList extends Component {
   static propTypes = {
     fetchingApps: PropTypes.bool.isRequired,
-    authorisedApps: PropTypes.shape,
+    authorisedApps: PropTypes.arrayOf(PropTypes.shape({
+      app_info: PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        vendor: PropTypes.string,
+      })
+    })),
     getAuthorisedApps: PropTypes.func,
-    revokeApp: PropTypes.func
   };
 
   static contextTypes = {
@@ -15,13 +21,12 @@ export default class AppList extends Component {
 
   constructor() {
     super();
-    this.setFixedHeader = this.setFixedHeader.bind(this);
-    this.getContainer = this.getContainer.bind(this);
+    this.title = 'Authorised Apps';
+    this.getApps = this.getApps.bind(this);
   }
 
   componentDidMount() {
     this.props.getAuthorisedApps();
-    window.addEventListener('scroll', this.setFixedHeader);
   }
 
   componentWillUpdate(nextProps) {
@@ -30,50 +35,35 @@ export default class AppList extends Component {
     }
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('scroll', this.setFixedHeader);
-  }
+  getApps() {
+    const { fetchingApps, authorisedApps } = this.props;
+    let apps = [];
 
-  setFixedHeader() {
-    return (window.scrollY > 10) ?
-      this.titlebar.classList.add('fixed') : this.titlebar.classList.remove('fixed');
-  }
-
-  getContainer() {
-    const { fetchingApps, authorisedApps, revokeApp } = this.props;
     if (fetchingApps) {
-      return <ListItem loading />;
+      return (<span>Fetching apps</span>);
     } else if (authorisedApps.length === 0) {
-      return <ListItem isDefault />;
+      return (<span>No Apps Found</span>);
     }
-    return authorisedApps.map((item, i) =>
-      <ListItem key={i} data={item} revokeApp={revokeApp} />);
+    apps = authorisedApps.map((app, i) => (
+      <Link key={i} to={`/app_details?id=${app.app_info.id}&index=${i}`}>
+        <div className="app-list-i">
+          <div className="app-list-i-b">
+            <div className={getAppIconClassName(i)}>{app.app_info.name.slice(0, 2)}</div>
+            <div className="app-list-i-name">{parseAppName(app.app_info.name)}</div>
+          </div>
+        </div>
+      </Link>
+    ));
+    return apps;
   }
 
   render() {
     return (
-      <div className="card app-list">
-        <div className="app-list-b">
-          <div
-            className="head"
-            ref={(c) => {
-              this.titlebar = c;
-            }}
-          >
-            <h3 className="heading md">Authorised applications</h3>
-          </div>
-          <div className="app-list-cntr">
-            <div className="title-bar">
-              <div className="title-bar-b">
-                <span>Name</span>
-                <span>Vendor</span>
-              </div>
-            </div>
-            <div className="app-list-i-b">
-              {
-                this.getContainer()
-              }
-            </div>
+      <div className="card-main-b">
+        <div className="card-main-h">{ this.title }</div>
+        <div className="card-main-cntr">
+          <div className="app-list">
+            { this.getApps()}
           </div>
         </div>
       </div>
