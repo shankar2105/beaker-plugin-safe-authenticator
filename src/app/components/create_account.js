@@ -178,7 +178,7 @@ export default class CreateAccount extends Component {
                 </div>
                 <div className="invitation">
                   <span className="separator">or</span>
-                  <button className="btn primary long">Claim an Invitation</button>
+                  <button type="button" className="btn primary long">Claim an Invitation</button>
                 </div>
               </form>
             </div>

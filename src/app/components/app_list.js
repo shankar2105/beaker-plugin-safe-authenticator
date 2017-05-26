@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
+import classNames from 'classnames';
 import { parseAppName, getAppIconClassName } from '../utils';
 
 export default class AppList extends Component {
@@ -12,6 +13,15 @@ export default class AppList extends Component {
         vendor: PropTypes.string,
       })
     })),
+    searchResult: PropTypes.arrayOf(PropTypes.shape({
+      app_info: PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        vendor: PropTypes.string,
+      })
+    })),
+    searchApp: PropTypes.func,
+    clearSearch: PropTypes.func,
     getAuthorisedApps: PropTypes.func,
   };
 
@@ -22,7 +32,12 @@ export default class AppList extends Component {
   constructor() {
     super();
     this.title = 'Authorised Apps';
+    this.getSearchContainer = this.getSearchContainer.bind(this);
+    this.getNoAppsContainer = this.getNoAppsContainer.bind(this);
     this.getApps = this.getApps.bind(this);
+    this.state = {
+      searchActive: false
+    };
   }
 
   componentDidMount() {
@@ -35,16 +50,74 @@ export default class AppList extends Component {
     }
   }
 
+  getNoAppsContainer() {
+    return (
+      <div className="no-apps">
+        <h3 className="no-apps-h">Looks like you haven&lsquo;t authorised any apps yet.</h3>
+        <div className="no-apps-img">{''}</div>
+        <div className="no-apps-down">
+          <h3 className="no-apps-down-h">Download sample applications here...</h3>
+          <a
+            rel="noopener noreferrer"
+            href="https://github.com/maidsafe/safe_examples/releases"
+            target="_blank"
+            className="no-apps-down-lnk"
+          >https://github.com/maidsafe/safe_examples/releases</a>
+        </div>
+      </div>
+    );
+  }
+
+  getSearchContainer() {
+    const searchClassNames = classNames(
+      'app-list-search',
+      {
+        active: this.state.searchActive
+      }
+    );
+    return (
+      <div className={searchClassNames}>
+        <button
+          type="button"
+          className="app-list-search-icn"
+          onClick={() => {
+            this.setState({ searchActive: true });
+          }}
+        >{''}</button>
+        <div className="app-list-search-ipt">
+          <input
+            type="text"
+            name="appListSearch"
+            ref={(c) => { this.searchInput = c; }}
+            onChange={(e) => {
+              this.props.searchApp(e.target.value);
+            }}
+          />
+          <button
+            type="button"
+            className="app-list-search-cancel"
+            onClick={() => {
+              this.setState({ searchActive: false });
+              this.props.clearSearch();
+            }}
+          >{''}</button>
+        </div>
+      </div>
+    );
+  }
+
   getApps() {
-    const { fetchingApps, authorisedApps } = this.props;
+    const { fetchingApps, authorisedApps, searchResult } = this.props;
     let apps = [];
 
     if (fetchingApps) {
       return (<span>Fetching apps</span>);
     } else if (authorisedApps.length === 0) {
-      return (<span>No Apps Found</span>);
+      return this.getNoAppsContainer();
     }
-    apps = authorisedApps.map((app, i) => (
+    const appList = (this.state.searchActive &&
+      this.searchInput.value) ? searchResult : authorisedApps;
+    apps = appList.map((app, i) => (
       <Link key={i} to={`/app_details?id=${app.app_info.id}&index=${i}`}>
         <div className="app-list-i">
           <div className="app-list-i-b">
@@ -58,12 +131,14 @@ export default class AppList extends Component {
   }
 
   render() {
+    const { authorisedApps } = this.props;
     return (
       <div className="card-main-b">
         <div className="card-main-h">{ this.title }</div>
         <div className="card-main-cntr">
           <div className="app-list">
-            { this.getApps()}
+            { authorisedApps.length === 0 ? null : this.getSearchContainer() }
+            { this.getApps() }
           </div>
         </div>
       </div>

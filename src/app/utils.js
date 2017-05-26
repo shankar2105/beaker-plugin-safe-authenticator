@@ -32,7 +32,7 @@ export const parseAppName = (name) => (
 );
 
 export const getAppIconClassName = (i) => {
-  const index = (i + 1) % 6;
+  const index = (parseInt(i, 10) + 1) % 6;
   return classNames(
     'app-list-i-h',
     'app-icon',
