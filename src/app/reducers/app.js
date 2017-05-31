@@ -45,7 +45,7 @@ const app = (state = initialState, action) => {
       return {
         ...state,
         searchResult: state.authorisedApps.filter((apps) => (
-            parseAppName(apps.app_info.name.toLowerCase())
+            parseAppName(apps.app_info.name).toLowerCase()
               .indexOf(action.value.toLowerCase()) === 0
           )
         )
