@@ -2,8 +2,11 @@ import {
   GET_AUTHORISED_APPS,
   REVOKE_APP,
   SET_APP_LIST,
-  CLEAR_APP_ERROR
+  CLEAR_APP_ERROR,
+  SEARCH_APP,
+  CLEAR_SEARCH
 } from '../actions/app';
+import { parseAppName } from '../utils';
 
 const initialState = {
   authorisedApps: [],
@@ -48,6 +51,19 @@ const app = (state = initialState, action) => {
     }
     case CLEAR_APP_ERROR: {
       return { ...state, error: null };
+    }
+    case SEARCH_APP: {
+      return {
+        ...state,
+        searchResult: state.authorisedApps.filter((apps) => (
+            parseAppName(apps.app_info.name).toLowerCase()
+              .indexOf(action.value.toLowerCase()) >= 0
+          )
+        )
+      };
+    }
+    case CLEAR_SEARCH: {
+      return { ...state, searchResult: [] };
     }
     default: {
       return state;
