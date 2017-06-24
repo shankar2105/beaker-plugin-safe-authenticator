@@ -42,7 +42,7 @@ class AppListCallback {
         }
         const apps = typeParser.parseRegisteredAppArray(appList, len);
         resolve(apps);
-      });
+      });    
     cbPool[this.id] = this.cb;
   }
 
@@ -66,6 +66,10 @@ class ClientManager extends FfiApi {
     this[_unRegAuthenticatorHandle] = null;
     this[_reqDecryptList] = {};
     this[_callbackRegistry] = {};
+    this.networkStateCb = ffi.Callback(types.Void,
+      [types.voidPointer, types.int32, types.int32], (userData, res, state) => {        
+        this._pushNetworkState(state);
+      });
   }
 
   get authenticatorHandle() {
@@ -91,7 +95,8 @@ class ClientManager extends FfiApi {
       encode_containers_resp: [types.Void, [types.voidPointer, types.ContainersReqPointer, types.u32, types.bool, types.voidPointer, 'pointer']],
       authenticator_registered_apps: [types.Void, [types.voidPointer, types.voidPointer, 'pointer']],
       authenticator_revoke_app: [types.Void, [types.voidPointer, types.CString, types.voidPointer, 'pointer']],
-      encode_unregistered_resp: [types.Void, [types.voidPointer, types.u32, types.bool, types.voidPointer, 'pointer']]
+      encode_unregistered_resp: [types.Void, [types.voidPointer, types.u32, types.bool, types.voidPointer, 'pointer']],
+      authenticator_free: [types.Void, [types.voidPointer]]
     };
   }
 
@@ -329,8 +334,6 @@ class ClientManager extends FfiApi {
         return reject(validationErr);
       }
 
-      this[_callbackRegistry].loginNwCb = this._getFfiNetworkStateCb();
-
       try {
         this[_callbackRegistry].loginCb = ffi.Callback(types.Void,
           [types.voidPointer, types.FfiResult, types.AppHandlePointer],
@@ -355,7 +358,7 @@ class ClientManager extends FfiApi {
           types.allocCString(secret),
           types.Null,
           types.Null,
-          this[_callbackRegistry].loginNwCb,
+          this.networkStateCb,
           this[_callbackRegistry].loginCb,
           onResult);
       } catch (e) {
@@ -377,7 +380,6 @@ class ClientManager extends FfiApi {
         return reject(validationErr);
       }
 
-      this[_callbackRegistry].CreateAccNwCb = this._getFfiNetworkStateCb();
       if (!(invitation && (typeof invitation === 'string') && invitation.trim())) {
         return Promise.reject(new Error(i18n.__('messages.invalid_invite_code')));
       }
@@ -406,7 +408,7 @@ class ClientManager extends FfiApi {
           types.allocCString(invitation),
           types.Null,
           types.Null,
-          this[_callbackRegistry].CreateAccNwCb,
+          this.networkStateCb,
           this[_callbackRegistry].createAccCb,
           onResult);
       } catch (e) {
@@ -419,7 +421,8 @@ class ClientManager extends FfiApi {
    * User logout
    */
   logout() {
-    this._pushNetworkState(-1);
+    this._pushNetworkState(CONST.NETWORK_STATUS.DISCONNECTED);
+    this.safeLib.authenticator_free(this.authenticatorHandle);
     this[_authenticatorHandle] = null;
   }
 
@@ -606,19 +609,6 @@ class ClientManager extends FfiApi {
         if (typeof this[_appListUpdateListener] === 'function') {
           this[_appListUpdateListener](null, apps);
         }
-      });
-  }
-
-  /**
-   * Prepare FFI network state callback function
-   * @returns {*}
-   * @private
-   */
-  _getFfiNetworkStateCb() {
-    return ffi.Callback(types.Void,
-      [types.voidPointer, types.int32, types.int32], (userData, res, state) => {
-        this[_networkState] = state;
-        this._pushNetworkState();
       });
   }
 

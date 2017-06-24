@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { parseAppName, getAppIconClassName } from '../utils';
+import CardLoaderFull from './card_loader_full';
 
 export default class AppDetails extends Component {
   static propTypes = {
@@ -20,7 +21,9 @@ export default class AppDetails extends Component {
       })
     })),
     getAuthorisedApps: PropTypes.func,
-    revokeApp: PropTypes.func
+    revokeApp: PropTypes.func,
+    loading: PropTypes.bool,
+    error: PropTypes.string
   };
 
   static contextTypes = {
@@ -35,6 +38,19 @@ export default class AppDetails extends Component {
   componentWillMount() {
     if ((this.props.authorisedApps).length === 0) {
       this.props.getAuthorisedApps();
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!prevProps.loading) {
+      return;
+    }
+    if (this.props.error) {
+      console.log('Revoked Error: ', this.props.error);
+      this.props.router.push('/');
+    } else {
+      console.log('Revoked');
+      this.props.router.push('/');
     }
   }
 
@@ -77,6 +93,9 @@ export default class AppDetails extends Component {
             {appDetail.app_info.name.slice(0, 2)}</span><b>{appName}</b> Permissions
         </div>
         <div className="card-main-cntr">
+          {this.props.loading &&
+            <CardLoaderFull msg="Revoking application. Please wait.."></CardLoaderFull>
+          }
           <div className="app-detail">
             <div className="app-detail-b">
               <div className="app-detail-keys">
@@ -104,7 +123,7 @@ export default class AppDetails extends Component {
                   type="button"
                   className="rgt btn flat danger"
                   onClick={() => {
-                    revokeApp(appId);
+                    revokeApp(appId + '-dum');
                   }}
                 >Revoke Access</button>
               </div>

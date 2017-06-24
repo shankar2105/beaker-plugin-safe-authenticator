@@ -5,10 +5,12 @@ import zxcvbn from 'zxcvbn';
 import classNames from 'classnames';
 import { getStrengthMsg } from '../utils';
 import CONSTANTS from '../../constants.json';
+import CardLoaderFull from './card_loader_full';
 
 export default class CreateAccount extends Component {
   static propTypes = {
     isAuthorised: PropTypes.bool,
+    loading: PropTypes.bool,
     navPos: PropTypes.number,
     secretStrength: PropTypes.number,
     passwordStrength: PropTypes.number,
@@ -210,6 +212,9 @@ export default class CreateAccount extends Component {
       <div className="card-main-cntr">
         <div className="auth">
           <div className="auth-b">
+            {this.props.loading &&
+              <CardLoaderFull msg="Registering on SAFE Network"></CardLoaderFull>
+            }
             <p className="auth-cont-1">
               Your &lsquo;Account Secret&lsquo; is private and should not be<br />
               shared with anyone.

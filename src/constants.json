@@ -12,10 +12,10 @@
   "DEFAULT_CLIENT_HANDLE_KEYS": {
     "AUTHENTICATOR": "authenticator"
   },
-  "NETWORK_STATUS": {
-    "CONNECTING": 0,
-    "CONNECTED": 1,
-    "DISCONNECTED": -1
+  "NETWORK_STATUS": {    
+    "CONNECTED": 0,
+    "DISCONNECTED": -1,
+    "CONNECTING": -2
   },
   "CREATE_ACC_NAV": {
     "WELCOME": 1,

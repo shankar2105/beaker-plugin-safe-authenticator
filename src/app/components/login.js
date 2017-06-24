@@ -1,9 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
+import CardLoaderFull from './card_loader_full';
 
 export default class Login extends Component {
   static propTypes = {
     isAuthorised: PropTypes.bool,
+    loading: PropTypes.bool,
     error: PropTypes.string,
     login: PropTypes.func,
     clearError: PropTypes.func
@@ -15,7 +17,7 @@ export default class Login extends Component {
 
   constructor() {
     super();
-    this.title = 'Log In to Authenticate your Apps';
+    this.title = 'Sign in to manage your apps';
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -72,6 +74,9 @@ export default class Login extends Component {
         <div className="card-main-b">
           <div className="card-main-h">{this.title}</div>
           <div className="card-main-cntr">
+            {this.props.loading &&
+              <CardLoaderFull msg="Signing in, please wait!"></CardLoaderFull>
+            }
             <div className="auth">
               <div className="auth-b login-b">
                 <div className="auth-form">
