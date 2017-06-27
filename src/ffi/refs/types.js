@@ -13,7 +13,7 @@ export const CString = ref.types.CString;
 
 // Pointer Types
 export const voidPointer = ref.refType(Void);
-export const AppHandlePointer = ref.refType(voidPointer);
+export const ClientHandlePointer = ref.refType(voidPointer);
 
 export const AppExchangeInfo = StructType({
   id: CString,
