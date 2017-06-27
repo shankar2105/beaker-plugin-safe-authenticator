@@ -60,23 +60,28 @@ class ReqQueue {
       return;
     }
     this.q.push(req);
+    console.log('this.q', this.q);
     this.process();
   }
 
   next() {
     this.preocessing = false;
+    if (this.q.length === 0) {
+      return;
+    }
     this.q.shift();
     this.process();
   }
 
   process() {
     const self = this;
-    if (this.preocessing) {
+    if (this.preocessing || this.q.length === 0 || !authenticator.registeredClientHandle) {
       return;
     }
     this.preocessing = true;
     this.req = this.q[0];
     authenticator.decodeRequest(this.req.uri).then((res) => {
+      console.log('decoded req', res);
       if (!res) {
         return;
       }
@@ -93,8 +98,8 @@ const reqQ = new ReqQueue();
 
 const registerNetworkListener = (e) => {
   authenticator.setListener(CONSTANTS.LISTENER_TYPES.NW_STATE_CHANGE, (err, state) => {
-    if (state === 1) {
-      reqQ.next();
+    if (state === CONSTANTS.NETWORK_STATUS.CONNECTED) {
+      reqQ.process();
     }
     console.log('ipx', state);
     e.sender.send('onNetworkStatus', state);
@@ -102,19 +107,21 @@ const registerNetworkListener = (e) => {
 };
 
 const decodeRequest = (e, data) => {
+  console.log('decodeRequest', data);
   const req = new Request(data);
   decodeEvent = e;
   reqQ.add(req);
 };
 
 const onAuthReq = (e) => {
-  authenticator.setListener(CONSTANTS.LISTENER_TYPES.AUTH_REQ, (req) => {
+  authenticator.setListener(CONSTANTS.LISTENER_TYPES.AUTH_REQ, (err, req) => {
+    console.log('onAuthReq', req);
     e.sender.send('onAuthReq', req);
   });
 };
 
 const onContainerReq = (e) => {
-  authenticator.setListener(CONSTANTS.LISTENER_TYPES.CONTAINER_REQ, (req) => {
+  authenticator.setListener(CONSTANTS.LISTENER_TYPES.CONTAINER_REQ, (err, req) => {
     e.sender.send('onContainerReq', req);
   });
 };
@@ -129,7 +136,7 @@ const onAuthDecision = (e, authData, isAllowed) => {
   }
   authenticator.encodeAuthResp(authData, isAllowed)
     .then((res) => {
-      e.sender.send('onAuthDecisionRes', new Response(reqQ.req, err).prepare());
+      e.sender.send('onAuthDecisionRes', new Response(reqQ.req, res).prepare());
       openExternal(res);
       reqQ.next();
     })

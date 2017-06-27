@@ -212,9 +212,6 @@ export default class CreateAccount extends Component {
       <div className="card-main-cntr">
         <div className="auth">
           <div className="auth-b">
-            {this.props.loading &&
-              <CardLoaderFull msg="Registering on SAFE Network"></CardLoaderFull>
-            }
             <p className="auth-cont-1">
               Your &lsquo;Account Secret&lsquo; is private and should not be<br />
               shared with anyone.
@@ -516,12 +513,12 @@ export default class CreateAccount extends Component {
   }
 
   render() {
-    // if (loading) {
-    //   return <AuthLoader cancelAuthReq={clearAuthLoader} />;
-    // }
     return (
       <div>
         <div className="card-main-b">
+          {this.props.loading &&
+            <CardLoaderFull msg="Registering on SAFE Network"></CardLoaderFull>
+          }
           <div className="card-main-h">{this.getTitle()}</div>
           { this.getContainer() }
         </div>

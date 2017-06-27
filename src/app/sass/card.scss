@@ -5,6 +5,7 @@
   .card-main-b {
     border-radius: 10px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.26);
+    position: relative;
   }
   .card-main-h, .card-main-h-2 {
     line-height: $card-main-head-height;

@@ -123,7 +123,7 @@ export default class AppDetails extends Component {
                   type="button"
                   className="rgt btn flat danger"
                   onClick={() => {
-                    revokeApp(appId + '-dum');
+                    revokeApp(appId);
                   }}
                 >Revoke Access</button>
               </div>

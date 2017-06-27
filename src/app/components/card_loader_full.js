@@ -13,8 +13,13 @@ export default class CardLoaderFull extends Component {
 
 	render() {
 		return (
-				<div>
-					{this.props.msg}
+				<div className="full-loader">
+					<div className="full-loader-b">
+						<div className="full-loader-ib">
+							<span className="full-loader-i">{''}</span>
+							<span className="full-loader-msg">{this.props.msg}</span>
+						</div>
+					</div>
 				</div>
 			);
 	}
