@@ -10,7 +10,8 @@ const mapStateToProps = (state) => (
     authorisedApps: state.app.authorisedApps,
     loading: state.app.loading,
     searchResult: state.app.searchResult,
-    error: state.app.error
+    revokeError: state.app.revokeError,
+    appListError: state.app.appListError
   }
 );
 

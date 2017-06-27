@@ -1,6 +1,13 @@
 .app-list {
   height: $app-list-height;
   overflow: auto;
+  .fetching {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 50px;
+    opacity: 0.8;
+  }
   .app-list-i {
     width: 33.33%;
     padding-top: 35px;

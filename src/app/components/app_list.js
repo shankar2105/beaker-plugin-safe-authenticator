@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 import classNames from 'classnames';
 import { parseAppName, getAppIconClassName } from '../utils';
+import Popup from './popup';
 
 export default class AppList extends Component {
   static propTypes = {
@@ -22,7 +23,10 @@ export default class AppList extends Component {
     })),
     searchApp: PropTypes.func,
     clearSearch: PropTypes.func,
+    clearAppError: PropTypes.func,
     getAuthorisedApps: PropTypes.func,
+    revokeError: PropTypes.string,
+    appListError: PropTypes.string,
   };
 
   static contextTypes = {
@@ -35,8 +39,12 @@ export default class AppList extends Component {
     this.getSearchContainer = this.getSearchContainer.bind(this);
     this.getNoAppsContainer = this.getNoAppsContainer.bind(this);
     this.getApps = this.getApps.bind(this);
+    this.resetPopup = this.resetPopup.bind(this);
     this.state = {
-      searchActive: false
+      searchActive: false,
+      showPopup: false,
+      popupTitle: null,
+      popupDesc: null
     };
   }
 
@@ -48,6 +56,31 @@ export default class AppList extends Component {
     if (!nextProps.isAuthorised) {
       return this.context.router.push('/login');
     }
+  }
+
+  componentDidUpdate() {
+    if (this.props.revokeError) {
+      this.setState({
+        showPopup: true,
+        popupTitle: 'Unable to revoke app. Please try again.',
+        popupDesc: this.props.revokeError
+      });
+    }
+    if (this.props.appListError) {
+      this.setState({
+        showPopup: true,
+        popupTitle: 'Unable to fetch registered apps. Please try again.',
+        popupDesc: this.props.appListError
+      });
+    }
+  }
+
+  resetPopup() {
+    this.setState({
+      showPopup: false,
+      popupTitle: null,
+      popupDesc: null
+    })
   }
 
   getNoAppsContainer() {
@@ -88,7 +121,9 @@ export default class AppList extends Component {
           <input
             type="text"
             name="appListSearch"
-            ref={(c) => { this.searchInput = c; }}
+            ref={(c) => {
+              this.searchInput = c;
+            }}
             onChange={(e) => {
               this.props.searchApp(e.target.value);
             }}
@@ -120,15 +155,15 @@ export default class AppList extends Component {
     let apps = [];
 
     if (fetchingApps) {
-      return (<span>Fetching apps</span>);
+      return (<span className="fetching">Fetching apps...</span>);
     } else if (authorisedApps.length === 0) {
       return this.getNoAppsContainer();
     }
     const appList = (this.state.searchActive &&
-      this.searchInput.value) ? searchResult : authorisedApps;
+    this.searchInput.value) ? searchResult : authorisedApps;
     if (appList.length === 0) {
       return this.getNoMatchingAppsContainer();
-    }  
+    }
     apps = appList.map((app, i) => (
       <Link key={i} to={`/app_details?id=${app.app_info.id}&index=${i}`}>
         <div className="app-list-i">
@@ -148,6 +183,16 @@ export default class AppList extends Component {
       <div className="card-main-b">
         <div className="card-main-h">{ this.title }</div>
         <div className="card-main-cntr">
+          <Popup
+            show={this.state.showPopup}
+            error={true}
+            callback={() => {
+              this.props.clearAppError();
+              this.resetPopup();
+            }}
+            title={this.state.popupTitle}
+            desc={this.state.popupDesc}
+          />
           <div className="app-list">
             { authorisedApps.length === 0 ? null : this.getSearchContainer() }
             { this.getApps() }

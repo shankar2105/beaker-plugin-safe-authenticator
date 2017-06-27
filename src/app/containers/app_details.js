@@ -8,8 +8,7 @@ const mapStateToProps = (state) => (
     isAuthorised: state.auth.isAuthorised,
     fetchingApps: state.app.fetchingApps,
     authorisedApps: state.app.authorisedApps,
-    loading: state.app.loading,
-    error: state.app.error
+    loading: state.app.loading
   }
 );
 

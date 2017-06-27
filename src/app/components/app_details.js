@@ -22,8 +22,7 @@ export default class AppDetails extends Component {
     })),
     getAuthorisedApps: PropTypes.func,
     revokeApp: PropTypes.func,
-    loading: PropTypes.bool,
-    error: PropTypes.string
+    loading: PropTypes.bool
   };
 
   static contextTypes = {
@@ -44,13 +43,6 @@ export default class AppDetails extends Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.loading) {
       return;
-    }
-    if (this.props.error) {
-      console.log('Revoked Error: ', this.props.error);
-      this.props.router.push('/');
-    } else {
-      console.log('Revoked');
-      this.props.router.push('/');
     }
   }
 
@@ -123,7 +115,8 @@ export default class AppDetails extends Component {
                   type="button"
                   className="rgt btn flat danger"
                   onClick={() => {
-                    revokeApp(appId);
+                    revokeApp(appId + '-dum');
+                    this.props.router.push('/');
                   }}
                 >Revoke Access</button>
               </div>

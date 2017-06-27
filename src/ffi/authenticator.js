@@ -293,9 +293,9 @@ class Authenticator extends SafeLib {
           types.allocCString(parsedURI),
           types.Null,
           this._getCb(decodeReqAuthCb),
+          this._getCb(unregisteredCb),
           this._getCb(decodeReqContainerCb),
-          this._getCb(decodeReqErrorCb),
-          this._getCb(unregisteredCb));
+          this._getCb(decodeReqErrorCb));
       } catch (e) {
         reject(e);
       }
