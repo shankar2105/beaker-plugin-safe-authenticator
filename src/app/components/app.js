@@ -1,8 +1,10 @@
 import React, { Component, PropTypes } from 'react';
+import NetworkStatus from './network_status';
 
 export default class App extends Component {
   static propTypes = {
     children: PropTypes.element.isRequired,
+    networkState: PropTypes.number,
     isAuthorised: PropTypes.bool,
     logout: PropTypes.func
   };
@@ -25,6 +27,7 @@ export default class App extends Component {
             logout();
           }}
         >Logout</button>
+        <NetworkStatus status={this.props.networkState} />
       </div>
     );
   }

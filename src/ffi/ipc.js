@@ -60,7 +60,6 @@ class ReqQueue {
       return;
     }
     this.q.push(req);
-    console.log('this.q', this.q);
     this.process();
   }
 
@@ -81,7 +80,6 @@ class ReqQueue {
     this.preocessing = true;
     this.req = this.q[0];
     authenticator.decodeRequest(this.req.uri).then((res) => {
-      console.log('decoded req', res);
       if (!res) {
         return;
       }
@@ -101,13 +99,11 @@ const registerNetworkListener = (e) => {
     if (state === CONSTANTS.NETWORK_STATUS.CONNECTED) {
       reqQ.process();
     }
-    console.log('ipx', state);
     e.sender.send('onNetworkStatus', state);
   });
 };
 
 const decodeRequest = (e, data) => {
-  console.log('decodeRequest', data);
   const req = new Request(data);
   decodeEvent = e;
   reqQ.add(req);
@@ -115,7 +111,6 @@ const decodeRequest = (e, data) => {
 
 const onAuthReq = (e) => {
   authenticator.setListener(CONSTANTS.LISTENER_TYPES.AUTH_REQ, (err, req) => {
-    console.log('onAuthReq', req);
     e.sender.send('onAuthReq', req);
   });
 };

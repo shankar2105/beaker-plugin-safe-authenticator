@@ -68,12 +68,15 @@ class Authenticator extends SafeLib {
     this[_registeredClientHandle] = handle;
   }
 
-  set networkState(state) {
-    this[_nwState] = state;
-  }
-
   get networkState() {
     return this[_nwState];
+  }
+
+  set networkState(state) {
+    if (typeof state === 'undefined') {
+      return;
+    }
+    this[_nwState] = state;
   }
 
   get networkStateCb() {
@@ -217,20 +220,17 @@ class Authenticator extends SafeLib {
   }
 
   decodeRequest(uri) {
-    console.log('uri', uri);
     return new Promise((resolve, reject) => {
       if (!uri) {
         return reject(new Error('Invalid URI'));
       }
       const parsedURI = uri.replace('safe-auth://', '').replace('safe-auth:', '').replace('/', '');
-      console.log('parsedURI', parsedURI)
 
       if (!this.registeredClientHandle) {
         return reject(new Error(i18n.__('messages.unauthorised')));
       }
       const decodeReqAuthCb = this._pushCb(ffi.Callback(types.Void,
         [types.voidPointer, types.u32, types.AuthReqPointer], (userData, reqId, req) => {
-          console.log('decodeReqAuthCb req', reqId);
           if (!(this[_authReqListener] && this[_authReqListener].len() !== 0)) {
             return;
           }
@@ -240,10 +240,8 @@ class Authenticator extends SafeLib {
             reqId,
             authReq
           };
-          console.log('result', result);
           return this._isAlreadyAuthorised(authReq)
             .then((isAuthorised) => {
-              console.log('isAuthorised', isAuthorised);
               if (isAuthorised) {
                 return this.encodeAuthResp(result, true)
                   .then(resolve);
@@ -268,7 +266,6 @@ class Authenticator extends SafeLib {
 
       const decodeReqErrorCb = this._pushCb(ffi.Callback(types.Void,
         [types.voidPointer, types.FfiResult, types.CString], (userData, result, error) => {
-          console.log('decodeReqErrorCb', error)
           if (!(this[_reqErrListener] && this[_reqErrListener].len() !== 0)) {
             return;
           }
@@ -393,7 +390,6 @@ class Authenticator extends SafeLib {
   }
 
   revokeApp(appId) {
-    console.log('revokeApp appId', appId)
     return new Promise((resolve, reject) => {
       if (!this.registeredClientHandle) {
         return reject(new Error(i18n.__('messages.unauthorised')));
@@ -415,7 +411,6 @@ class Authenticator extends SafeLib {
         const revokeCb = this._pushCb(ffi.Callback(types.Void,
           [types.voidPointer, types.FfiResult, types.CString],
           (userData, result, res) => {
-          console.log('revoke rer', result, res)
             const code = result.error_code;
             if (code !== 0) {
               return reject(JSON.stringify(result));
@@ -529,7 +524,6 @@ class Authenticator extends SafeLib {
    * @private
    */
   _pushNetworkState(state) {
-    console.log('_pushNetworkState', state)
     let networkState = state;
     if (typeof networkState === 'undefined') {
       networkState = this.networkState;
@@ -538,7 +532,7 @@ class Authenticator extends SafeLib {
     this.networkState = networkState;
 
     if (this[_nwStateChangeListener] && this[_nwStateChangeListener].len() !== 0) {
-      this[_nwStateChangeListener].broadcast(null, networkState);
+      this[_nwStateChangeListener].broadcast(null, this.networkState);
     }
   }
 

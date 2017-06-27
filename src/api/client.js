@@ -20,7 +20,7 @@ export const setNetworkListener = (cb) =>
 export const setAppListUpdateListener = (cb) =>
   authenticator.setListener(CONSTANTS.LISTENER_TYPES.APP_LIST_UPDATE, cb);
 
-export const getNetworkState = () => (authenticator.networkState);
+export const getNetworkState = () => ({ state: authenticator.networkState });
 
 export const getAuthenticatorHandle = () => (authenticator.registeredClientHandle);
 

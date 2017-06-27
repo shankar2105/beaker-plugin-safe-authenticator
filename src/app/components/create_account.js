@@ -4,7 +4,7 @@ import { I18n } from 'react-redux-i18n';
 import zxcvbn from 'zxcvbn';
 import classNames from 'classnames';
 import { getStrengthMsg } from '../utils';
-import CONSTANTS from '../../constants.json';
+import CONSTANTS from '../../constants';
 import CardLoaderFull from './card_loader_full';
 
 export default class CreateAccount extends Component {

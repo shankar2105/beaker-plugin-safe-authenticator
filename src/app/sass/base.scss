@@ -105,3 +105,63 @@ body {
     }
   }
 }
+
+.nw-status {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  position: relative;
+  float: right;
+  margin-left: 16px;
+  &-i {
+    width: 30px;
+    height: inherit;
+    display: block;
+    background: {
+      position: center;
+      repeat: no-repeat;
+    }
+    cursor: pointer;
+    &.connecting {
+      background-image: url($nw-connecting-url);
+      animation: spin 0.4s linear infinite;
+    }
+    &.connected {
+      background-image: url($nw-connected-url);
+    }
+    //&.error {
+    //  background-image: url($nw-error-url);
+    //}
+  }
+  &-tooltip {
+    display: none;
+    position: absolute;
+    font-size: 12px;
+    color: #ffffff;
+    line-height: 30px;
+    background-color: $tooltip-bg;
+    padding: 0 8px;
+    bottom: 4px;
+    right: 100%;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.26);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-right: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  &:hover {
+    .nw-status-tooltip {
+      display: inline-block;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
