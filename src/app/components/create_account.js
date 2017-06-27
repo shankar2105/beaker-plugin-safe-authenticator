@@ -517,7 +517,7 @@ export default class CreateAccount extends Component {
       <div>
         <div className="card-main-b">
           {this.props.loading &&
-            <CardLoaderFull msg="Registering on SAFE Network"></CardLoaderFull>
+            <CardLoaderFull msg="Registering on SAFE Network">{''}</CardLoaderFull>
           }
           <div className="card-main-h">{this.getTitle()}</div>
           { this.getContainer() }

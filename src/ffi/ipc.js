@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { ipcMain, shell } from 'electron';
 import i18n from 'i18n';
 
@@ -173,6 +174,9 @@ const onReqError = (e) => {
 };
 
 const init = () => {
+  if (!ipcMain) {
+    return;
+  }
   ipcMain.on('registerSafeNetworkListener', registerNetworkListener);
   ipcMain.on('decryptRequest', decodeRequest);
   ipcMain.on('registerOnAuthReq', onAuthReq);

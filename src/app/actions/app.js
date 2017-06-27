@@ -4,7 +4,7 @@ export const SET_APP_LIST = 'SET_APP_LIST';
 export const CLEAR_APP_ERROR = 'CLEAR_APP_LIST';
 export const SEARCH_APP = 'SEARCH_APP';
 export const CLEAR_SEARCH = 'CLEAR_SEARCH';
-	
+
 export const getAuthorisedApps = () => ({
   type: GET_AUTHORISED_APPS,
   payload: window.safeAuthenticator.getAuthorisedApps()

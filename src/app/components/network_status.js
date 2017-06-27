@@ -11,10 +11,16 @@ export default class Spinner extends Component {
     let message = null;
     switch (this.props.status) {
       case CONSTANTS.NETWORK_STATUS.CONNECTED: {
-        message = "Connected";
+        message = 'Connected';
+        break;
       }
       case CONSTANTS.NETWORK_STATUS.DISCONNECTED: {
-        message = "Connecting";
+        message = 'Connecting';
+        break;
+      }
+      default: {
+        message = 'Terminated';
+        break;
       }
     }
     return (

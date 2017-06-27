@@ -40,12 +40,6 @@ export default class AppDetails extends Component {
     }
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.loading) {
-      return;
-    }
-  }
-
   componentWillUpdate(nextProps) {
     if (!nextProps.isAuthorised) {
       return this.context.router.push('/login');
@@ -86,7 +80,7 @@ export default class AppDetails extends Component {
         </div>
         <div className="card-main-cntr">
           {this.props.loading &&
-            <CardLoaderFull msg="Revoking application. Please wait.."></CardLoaderFull>
+            <CardLoaderFull msg="Revoking application. Please wait..">{''}</CardLoaderFull>
           }
           <div className="app-detail">
             <div className="app-detail-b">

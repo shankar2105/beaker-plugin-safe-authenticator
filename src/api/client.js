@@ -13,7 +13,6 @@ export const manifest = {
   revokeApp: 'promise'
 };
 
-//FIXME check for unused listeners
 export const setNetworkListener = (cb) =>
   authenticator.setListener(CONSTANTS.LISTENER_TYPES.NW_STATE_CHANGE, cb);
 

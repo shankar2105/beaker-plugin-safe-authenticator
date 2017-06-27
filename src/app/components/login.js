@@ -75,7 +75,7 @@ export default class Login extends Component {
           <div className="card-main-h">{this.title}</div>
           <div className="card-main-cntr">
             {this.props.loading &&
-              <CardLoaderFull msg="Signing in, please wait!"></CardLoaderFull>
+              <CardLoaderFull msg="Signing in, please wait!">{''}</CardLoaderFull>
             }
             <div className="auth">
               <div className="auth-b login-b">

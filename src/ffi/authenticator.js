@@ -1,6 +1,7 @@
 /**
  * Authenticator
  */
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable import/no-unresolved, import/extensions */
 import ffi from 'ffi';
 /* eslint-enable import/no-unresolved, import/extensions */
@@ -94,11 +95,11 @@ class Authenticator extends SafeLib {
       authenticator_revoke_app: [types.Void, [types.voidPointer, types.CString, types.voidPointer, 'pointer']],
       encode_unregistered_resp: [types.Void, [types.voidPointer, types.u32, types.bool, types.voidPointer, 'pointer']],
       authenticator_free: [types.Void, [types.voidPointer]]
-    }
+    };
   }
 
   setListener(type, cb) {
-    //FIXME check .key required
+    // FIXME check .key required
     switch (type.key) {
       case CONSTANTS.LISTENER_TYPES.APP_LIST_UPDATE.key: {
         return this[_appListUpdateListener].add(cb);
@@ -114,6 +115,29 @@ class Authenticator extends SafeLib {
       }
       case CONSTANTS.LISTENER_TYPES.REQUEST_ERR.key: {
         return this[_reqErrListener].add(cb);
+      }
+      default: {
+        throw new Error('Invalid listener type');
+      }
+    }
+  }
+
+  removeListener(type, id) {
+    switch (type.key) {
+      case CONSTANTS.LISTENER_TYPES.APP_LIST_UPDATE.key: {
+        return this[_appListUpdateListener].remove(id);
+      }
+      case CONSTANTS.LISTENER_TYPES.AUTH_REQ.key: {
+        return this[_authReqListener].remove(id);
+      }
+      case CONSTANTS.LISTENER_TYPES.CONTAINER_REQ.key: {
+        return this[_containerReqListener].remove(id);
+      }
+      case CONSTANTS.LISTENER_TYPES.NW_STATE_CHANGE.key: {
+        return this[_nwStateChangeListener].remove(id);
+      }
+      case CONSTANTS.LISTENER_TYPES.REQUEST_ERR.key: {
+        return this[_reqErrListener].remove(id);
       }
       default: {
         throw new Error('Invalid listener type');
@@ -354,7 +378,7 @@ class Authenticator extends SafeLib {
         return reject(new Error(i18n.__('messages.invalid_params')));
       }
 
-      if (!req.reqId || !this[_reqDecryptList][req.reqId]) {
+      if (!req.reqId || !this[_decodeReqPool][req.reqId]) {
         return reject(new Error(i18n.__('messages.invalid_req')));
       }
       const contReq = types.allocContainerReq(typeConstructor.constructContainerReq(

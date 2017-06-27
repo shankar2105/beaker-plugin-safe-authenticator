@@ -1,7 +1,7 @@
 /**
  * SafeLib class - base class for other lib classes
  */
-
+/* eslint-disable no-underscore-dangle */
 // Private variables
 const _safeLib = Symbol('safeLib');
 
@@ -25,4 +25,4 @@ export default class SafeLib {
   /* eslint-enable no-unused-vars */
   fnsToRegister() {}
   /* eslint-enable class-methods-use-this */
-};
+}

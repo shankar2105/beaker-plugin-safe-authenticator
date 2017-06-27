@@ -70,7 +70,7 @@ export const FfiResult = StructType({
 
 export const ContainersReqPointer = ref.refType(ContainersReq);
 
-export const allocAppHandlePointer = () => (ref.alloc(AppHandlePointer));
+export const allocAppHandlePointer = () => (ref.alloc(ClientHandlePointer));
 
 export const allocCString = (str) => (ref.allocCString(str));
 

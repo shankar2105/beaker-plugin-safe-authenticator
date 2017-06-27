@@ -6,16 +6,16 @@ export default {
     DISCONNECTED: -1
   },
   LIB_PATH: {
-    PTHREAD: "./libwinpthread-1.dll",
+    PTHREAD: './libwinpthread-1.dll',
     SAFE_AUTH: {
-      win32: "./safe_authenticator.dll",
-      darwin: "./libsafe_authenticator.dylib",
-      linux: "./libsafe_authenticator.so"
+      win32: './safe_authenticator.dll',
+      darwin: './libsafe_authenticator.dylib',
+      linux: './libsafe_authenticator.so'
     },
     SYSTEM_URI: {
-      win32: "./system_uri.dll",
-      darwin: "./libsystem_uri.dylib",
-      linux: "./libsystem_uri.so"
+      win32: './system_uri.dll',
+      darwin: './libsystem_uri.dylib',
+      linux: './libsystem_uri.so'
     }
   },
   LISTENER_TYPES: new Enum([
@@ -42,9 +42,9 @@ export default {
     SECURE: 10
   },
   PASSPHRASE_STRENGTH_MSG: {
-    VERY_WEAK: "Very weak",
-    WEAK: "Weak",
-    SOMEWHAT_SECURE: "Somewhat secure",
-    SECURE: "Secure"
+    VERY_WEAK: 'Very weak',
+    WEAK: 'Weak',
+    SOMEWHAT_SECURE: 'Somewhat secure',
+    SECURE: 'Secure'
   }
 };

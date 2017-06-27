@@ -5,8 +5,11 @@ export default class Popup extends Component {
   static propTypes = {
     show: PropTypes.bool.isRequired,
     error: PropTypes.bool,
+    title: PropTypes.string,
+    desc: PropTypes.string,
     callback: PropTypes.func
   };
+
   constructor() {
     super();
     this.state = {
@@ -40,14 +43,14 @@ export default class Popup extends Component {
             <span className="desc">{this.props.title}</span>
             {
               this.props.desc ? <div className={showDetailClass}>
-                  <span className="info">{this.props.desc}</span>
-                  <button
-                    className="head"
-                    onClick={() => {
-                      this.setState({ showDetail: !this.state.showDetail });
-                    }}
-                  >{this.state.showDetail ? 'less' : 'more'}</button>
-                </div> : null
+                <span className="info">{this.props.desc}</span>
+                <button
+                  className="head"
+                  onClick={() => {
+                    this.setState({ showDetail: !this.state.showDetail });
+                  }}
+                >{this.state.showDetail ? 'less' : 'more'}</button>
+              </div> : null
             }
             <div className="opt">
               <button
@@ -56,7 +59,8 @@ export default class Popup extends Component {
                 onClick={() => {
                   this.props.callback();
                 }}
-              >Ok</button>
+              >Ok
+              </button>
             </div>
           </div>
         </div>

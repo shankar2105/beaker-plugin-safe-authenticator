@@ -56,9 +56,6 @@ export default class AppList extends Component {
     if (!nextProps.isAuthorised) {
       return this.context.router.push('/login');
     }
-  }
-
-  componentDidUpdate() {
     if (this.props.revokeError) {
       this.setState({
         showPopup: true,
@@ -73,14 +70,6 @@ export default class AppList extends Component {
         popupDesc: this.props.appListError
       });
     }
-  }
-
-  resetPopup() {
-    this.setState({
-      showPopup: false,
-      popupTitle: null,
-      popupDesc: null
-    })
   }
 
   getNoAppsContainer() {
@@ -147,7 +136,7 @@ export default class AppList extends Component {
       <div className="no-apps">
         No apps match the search criteria
       </div>
-    )
+    );
   }
 
   getApps() {
@@ -177,6 +166,14 @@ export default class AppList extends Component {
     return apps;
   }
 
+  resetPopup() {
+    this.setState({
+      showPopup: false,
+      popupTitle: null,
+      popupDesc: null
+    });
+  }
+
   render() {
     const { authorisedApps } = this.props;
     return (
@@ -185,7 +182,7 @@ export default class AppList extends Component {
         <div className="card-main-cntr">
           <Popup
             show={this.state.showPopup}
-            error={true}
+            error={this.props.appListError || this.props.revokeError}
             callback={() => {
               this.props.clearAppError();
               this.resetPopup();

@@ -41,8 +41,7 @@ const networkStateListenerCb = (err, state) => {
       return store.dispatch(setNetworkDisconnected());
     }
     default: {
-      return store.dispatch(setNetworkDisconnected());
-      console.error(I18n.t('invalid_network_state'))
+      throw new Error(I18n.t('invalid_network_state'));
     }
   }
 };
