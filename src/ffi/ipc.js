@@ -38,14 +38,6 @@ class Request {
   }
 }
 
-class Response {
-  constructor(req, res) {
-    this.id = req.id;
-    this.type = req.type;
-    this.res = res;
-  }
-}
-
 class ReqQueue {
   constructor(resChannelName, errChannelName) {
     this.q = [];
@@ -157,12 +149,14 @@ const onAuthDecision = (e, authData, isAllowed) => {
   }
   authenticator.encodeAuthResp(authData, isAllowed)
     .then((res) => {
-      e.sender.send('onAuthDecisionRes', new Response(reqQ.req, res));
+      reqQ.req.res = res;
+      e.sender.send('onAuthDecisionRes', reqQ.req);
       openExternal(res);
       reqQ.next();
     })
     .catch((err) => {
-      e.sender.send('onAuthDecisionRes', new Response(reqQ.req, err));
+      reqQ.req.error = err;
+      e.sender.send('onAuthDecisionRes', reqQ.req);
       console.error('Auth decision error :: ', err.message);
       reqQ.next();
     });
@@ -179,12 +173,14 @@ const onContainerDecision = (e, contData, isAllowed) => {
 
   authenticator.encodeContainersResp(contData, isAllowed)
     .then((res) => {
-      e.sender.send('onContDecisionRes', new Response(reqQ.req, res));
+      reqQ.req.res = res;
+      e.sender.send('onContDecisionRes', reqQ.req);
       openExternal(res);
       reqQ.next();
     })
     .catch((err) => {
-      e.sender.send('onContDecisionRes', new Response(reqQ.req, err));
+      reqQ.req.error = err;
+      e.sender.send('onContDecisionRes', reqQ.req);
       console.error('Container decision error :: ', err.message);
       reqQ.next();
     });
@@ -201,20 +197,22 @@ const onSharedMDataDecision = (e, data, isAllowed) => {
 
   authenticator.encodeMDataResp(data, isAllowed)
     .then((res) => {
-      e.sender.send('onSharedMDataRes', new Response(reqQ.req, res));
+      reqQ.req.res = res;
+      e.sender.send('onSharedMDataRes', reqQ.req);
       openExternal(res);
       reqQ.next();
     })
     .catch((err) => {
-      e.sender.send('onSharedMDataRes', new Response(reqQ.req, err));
+      reqQ.req.error = err;
+      e.sender.send('onSharedMDataRes', reqQ.req);
       reqQ.next();
     });
 };
 
 const onReqError = (e) => {
   authenticator.setListener(CONSTANTS.LISTENER_TYPES.REQUEST_ERR, (err) => {
-    e.sender.send('onAuthResError', new Response(reqQ.req, err));
-    openExternal(err.msg);
+    reqQ.req.error = err;
+    e.sender.send('onAuthResError', reqQ.req);
     reqQ.next();
   });
 };
