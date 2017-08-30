@@ -8,7 +8,7 @@ import config from '../config';
 
 config.i18n();
 
-let decodeEvent = null;
+let ipcEvent = null;
 
 const parseResUrl = (url) => {
   const split = url.split(':');
@@ -29,13 +29,18 @@ const openExternal = (uri) => {
 
 class Request {
   constructor(req) {
+    this.id = req.id;
+    this.uri = req.uri;
+    this.isUnRegistered = req.isUnRegistered;
     this.type = CONSTANTS.CLIENT_TYPES[req.type];
-    this.uri = req.data;
+    this.error = null;
+    this.res = null;
   }
 }
 
 class Response {
   constructor(req, res) {
+    this.id = req.id;
     this.type = req.type;
     this.res = res;
   }
@@ -79,13 +84,16 @@ class ReqQueue {
       if (!res) {
         return;
       }
-      if (decodeEvent) {
-        decodeEvent.sender.send(self.resChannelName, new Response(self.req, res));
+      this.req.res = res;
+      if (ipcEvent) {
+        ipcEvent.sender.send(self.resChannelName, self.req);
       }
       openExternal(res);
       self.next();
     }).catch((err) => {
-      decodeEvent.sender.send(self.errChannelName, new Response(self.req, err.message));
+      // FIXME: if error occurs for unregistered client process next 
+      self.req.error = err;
+      ipcEvent.sender.send(self.errChannelName, self.req);
     });
   }
 }
@@ -103,13 +111,21 @@ const registerNetworkListener = (e) => {
   });
 };
 
-const decodeRequest = (e, data, isUnregisteredClient) => {
-  const req = new Request(data);
-  decodeEvent = e;
-  if (isUnregisteredClient) {
-    unregisteredReqQ.add(req);
+const decodeRequest = (e, req, type) => {
+  const isWebReq = (type === CONSTANTS.CLIENT_TYPES.WEB);
+  const isUnRegistered = req.isUnRegistered;
+  const request = new Request({
+    id: req.id,
+    uri: isWebReq ? req.uri : req,
+    type,
+    isUnRegistered
+  });
+
+  ipcEvent = e;
+  if (isUnRegistered) {
+    unregisteredReqQ.add(request);
   } else {
-    reqQ.add(req);
+    reqQ.add(request);
   }
 };
 
