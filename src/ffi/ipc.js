@@ -91,7 +91,7 @@ class ReqQueue {
       openExternal(res);
       self.next();
     }).catch((err) => {
-      // FIXME: if error occurs for unregistered client process next 
+      // FIXME: if error occurs for unregistered client process next
       self.req.error = err.message;
       ipcEvent.sender.send(self.errChannelName, self.req);
     });
