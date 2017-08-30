@@ -92,7 +92,7 @@ class ReqQueue {
       self.next();
     }).catch((err) => {
       // FIXME: if error occurs for unregistered client process next 
-      self.req.error = err;
+      self.req.error = err.message;
       ipcEvent.sender.send(self.errChannelName, self.req);
     });
   }
